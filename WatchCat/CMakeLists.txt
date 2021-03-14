@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(WatchCat)
+set( CMAKE_VERBOSE_MAKEFILE on )
+find_package( OpenCV REQUIRED )
+set(CMAKE_BUILD_TYPE Debug)
+#include_directories(${DIR}/headers /usr/include)
+#link_directories (${DIR}/src/utils /opt/local/lib)
+set(HEADER_FILES main.h str_utils.h)
+set(SOURCE_FILES main.cpp str_utils.cpp)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+#TARGET_LINK_LIBRARIES(WatchCat opencv_core opencv_imgproc opencv_video)
+target_link_libraries( WatchCat ${OpenCV_LIBS} )
