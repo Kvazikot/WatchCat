@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <vector>
 #include <time.h>
+#include <iostream>
 #include <unistd.h>
 #include "str_utils.h"
 
@@ -23,7 +24,7 @@ public:
 
     AudioFilePlayer()
     {
-        CMD_PLAY_AUDIO = "cvlc %s &";
+        CMD_PLAY_AUDIO = "cvlc";
         SIREN_FILE = "~/WatchCat/SIREN1.wav";
         time(&t_since_play_start);
     }
@@ -38,38 +39,45 @@ public:
         : AudioFilePlayer()
     {
         SIREN_FILE = siren_file;
-        CMD_PLAY_AUDIO = parse_cmd();
+        CMD_PLAY_AUDIO = create_cmd();
+
     }
 
-    string parse_cmd()
+    string create_cmd()
     {
-        char cmd[255];
-        sprintf(cmd, CMD_PLAY_AUDIO.c_str(), (const char*)SIREN_FILE.c_str());
+        string cmd;
+        cmd  =  CMD_PLAY_AUDIO + " " + SIREN_FILE + " &";
         return string(cmd);
     }
 
     string get_duration()
     {
-        char cmd[255];
+        string cmd;
         int result;
-        sprintf(cmd, "ffmpeg -i %s  2>&1 | grep Duration | awk '{print $2}' | tr -d ,", SIREN_FILE.c_str());
+        cmd = "ffmpeg -i " + SIREN_FILE + " 2>&1 | grep Duration | awk '{print $2}' | tr -d ,";
         printf("\n");
-        //printf(cmd);
+        printf(cmd.c_str());
+        printf("\n");
         string res = execCommand(cmd, result);
+        printf(res.c_str());
+
         if(res.size()>8)
         {
             //parse string like this "00:00:09.37"
            vector<string> parts =  StrSplitE(res, ":.", false);
+           printf("CountSeps %d", CountSeps(res, ":."));
+           //return "";
            if (parts.size() == 4)
            {
                int h = StrToInt(parts[0]);
                int m = StrToInt(parts[1]);
                int s = StrToInt(parts[2]);
+               std::cout << parts[0] << " " << parts[1] << " " << parts[2] << "\n";
                printf("%d hours %d minutes %d seconds\n",h,m,s);
                duration_sec = h*60*60 + m*60 + s;
            }
         }
-
+        return res;
 
 
     }
@@ -88,11 +96,12 @@ public:
         //check if previos play is over
         if( delta >= duration_sec)
         {
-            string cmd = parse_cmd();
+            string cmd = create_cmd();
 
-            int result;
+
             int PID;
             if ((PID=fork())==0){
+                int result;
                 string res = execCommand(cmd, result);
             }
             time(&t_since_play_start);

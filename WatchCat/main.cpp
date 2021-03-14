@@ -41,8 +41,18 @@ std::string execCommand(const std::string cmd, int& out_exitStatus)
 }
 
 
+string get_date_time()
+{
+    char tmp[1024];
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    sprintf(tmp, "now: %d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    return tmp;
+}
+
 int MainLoop()
 {
+    bool bMotionDetected;
     VideoCapture cap;
     AudioFilePlayer player;
 
@@ -61,6 +71,9 @@ int MainLoop()
 
     for(;;)
     {
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+        vector<Rect> boundRect;
 
           cap >> frame;
           int cnt = 0;
@@ -75,7 +88,6 @@ int MainLoop()
             //GaussianBlur(gray1, prevFrame, Size(21, 21), 0);
             //frame.copyTo(frameDelta);
             absdiff(gray2, gray3, gray);
-            //imshow("this is you, smile! :)", frameDelta);
             threshold(gray, gray2, 25, 255, cv::THRESH_BINARY);
             InputArray arr(gray3);
             // dilate the thresholded image to fill in holes, then find contours
@@ -85,40 +97,54 @@ int MainLoop()
                                    Size( 2*dilation_size + 1, 2*dilation_size+1 ),
                                    Point( dilation_size, dilation_size ) );
             cv::dilate( gray2, gray, element );
-//                      if(gray.rows!=0) imshow("this is you, smile! :)", gray);
-            std::cout <<  "!!!!!!!! \n" ;
-            vector<vector<Point> > contours;
-            vector<Vec4i> hierarchy;
             findContours( gray, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE );
-
+            boundRect.resize(contours.size());
             // loop over the contours
 
             for( size_t i = 0; i< contours.size(); i++ )
-                {
-                    Scalar color = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
-                    drawContours( gray3, contours, (int)i, color, 2, LINE_8, hierarchy, 0 );
-                    std::cout << " Area: " << contourArea(contours[i]) << std::endl;
-                    if(contourArea(contours[i]) > 150)
-                        cnt++;
-                }
+            {
+                Scalar color = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
+                boundRect[i] = boundingRect( contours[i] );
+                //drawContours( gray3, contours, (int)i, color, 2, LINE_8, hierarchy, 0 );
+                //std::cout << " Area: " << contourArea(contours[i]) << std::endl;
+                if(contourArea(contours[i]) > 150)
+                    cnt++;
+            }
+
+
           }
+
 
           if(cnt > 3)
           {
-                player.Play();
+              player.Play();
+              bMotionDetected = true;
           }
+          else
+              bMotionDetected = false;
 
-            if(gray3.rows!=0) imshow("this is you, smile! :)", gray3);
+    // draw the text and timestamp on the frame
 
-          std::cout <<  "frame rows " << frame.rows << "\n";
           frame.copyTo(prevFrame);
           frame.copyTo(gray1);
           prevFrame.copyTo(gray);
-          std::cout <<  "prevFrame rows " << prevFrame.rows << "\n";
 
+          // overlay drawings
+          for( size_t i = 0; i< contours.size(); i++ )
+          {
+              Scalar color = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
+              rectangle( frame, boundRect[i].tl(), boundRect[i].br(), color, 2 );
+          }
+
+          putText(frame, get_date_time(), Point(10, frame.size[0] - 10), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 1);
+          if( bMotionDetected )
+             putText(frame, "Motion [DETECTED]", Point(10, 20), cv::FONT_HERSHEY_TRIPLEX, 0.5, cv::Scalar(0, 0, 255), 1);
+          else
+             putText(frame, "No Motion", Point(10, 20), cv::FONT_HERSHEY_TRIPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+
+          //if(gray3.rows!=0) imshow("this is you, smile! :)", frame);
 
           if( frame.empty() ) break; // end of video stream
-
 
           if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC
     }
@@ -132,6 +158,7 @@ void AudioPlayerTest()
 {
     AudioFilePlayer player;
     player.another_method();
+
     player.Play();
     sleep(10);
     player.Play();
@@ -145,6 +172,6 @@ void AudioPlayerTest()
 int main(int argc, char** argv)
 {
     //AudioPlayerTest();
-
+    //return 0;
     return MainLoop();
 }
