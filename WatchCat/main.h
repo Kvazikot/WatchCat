@@ -13,13 +13,33 @@ using namespace std;
 
 std::string execCommand(const std::string cmd, int& out_exitStatus);
 
+struct WatchCatOptions
+{
+    bool ShowVideo;
+    bool RedirectVideoToStdout;
+    bool ShowDate;
+    bool ShowRectangles;
+    bool PlaySound;
+    string  SIREN_FILE;
+    string  COPS_VIDEO;
+    WatchCatOptions()
+    {
+        ShowVideo = true;
+        PlaySound = true;
+        RedirectVideoToStdout = false;
+        ShowDate = false;
+        ShowRectangles = false;
+        SIREN_FILE = "~/WatchCat/SIREN1.wav";
+        COPS_VIDEO = "/home/vova/WatchCat/videos/cops_video.mp4";
+    }
+};
+
 class AudioFilePlayer
 {
 public:
     string SIREN_FILE;
     string CMD_PLAY_AUDIO;
     time_t t_since_play_start;
-    bool   isPlaying;
     long   duration_sec;
 
     AudioFilePlayer()
@@ -77,14 +97,25 @@ public:
                duration_sec = h*60*60 + m*60 + s;
            }
         }
-        return res;
 
+        return "";
 
     }
 
     void parse_duration()
     {
 
+    }
+
+    bool isPlaying()
+    {
+        time_t current_time;
+        time(&current_time);
+        time_t delta = current_time - t_since_play_start;
+        if( delta >= duration_sec)
+          return false;
+        else
+            return true;
     }
 
     void Play()

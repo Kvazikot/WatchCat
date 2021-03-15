@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.8.2, 2021-03-14T14:49:05. -->
+<!-- Written by QtCreator 4.8.2, 2021-03-15T00:30:48. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -126,7 +126,7 @@
      <value type="QString">CMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}</value>
      <value type="QString">QT_QMAKE_EXECUTABLE:STRING=%{Qt:qmakeExecutable}</value>
     </valuelist>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/vova/WatchCat/build-WatchCat-Desktop-u041eu0442u043bu0430u0434u043au0430</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/vova/WatchCat/build</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.AdditionalArguments"></value>
@@ -368,7 +368,7 @@
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseTerminal">true</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory"></value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/vova/WatchCat/build-WatchCat-Desktop-u041eu0442u043bu0430u0434u043au0430</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/vova/WatchCat/build</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>
