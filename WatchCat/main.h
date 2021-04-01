@@ -3,6 +3,7 @@
 
 #include <string>
 #include <stdio.h>
+#include <string.h>
 #include <vector>
 #include <time.h>
 #include <iostream>
@@ -11,7 +12,7 @@
 
 using namespace std;
 
-std::string execCommand(const std::string cmd, int& out_exitStatus);
+std::string execCommand(const std::string cmd, int& out_exitStatus, bool readPipe=true);
 
 struct WatchCatOptions
 {
@@ -20,8 +21,15 @@ struct WatchCatOptions
     bool ShowDate;
     bool ShowRectangles;
     bool PlaySound;
+    bool WriteOutputVideo;
+    bool  SendEmail;
+    double   email_interval_sec;
     string  SIREN_FILE;
-    string  COPS_VIDEO;
+    string  EMAIL_SCRIPT;
+    string  OUTPUT_VIDEO;
+    string  INPUT_VIDEO;
+    string  EMAIL;
+
     WatchCatOptions()
     {
         ShowVideo = true;
@@ -29,10 +37,24 @@ struct WatchCatOptions
         RedirectVideoToStdout = false;
         ShowDate = false;
         ShowRectangles = false;
-        SIREN_FILE = "~/WatchCat/SIREN1.wav";
-        COPS_VIDEO = "/home/vova/WatchCat/videos/cops_video.mp4";
+        SIREN_FILE = "~/WatchCat/asdl1_tone2.wav";
+        EMAIL_SCRIPT = "~/src/send_mail/send_mail.py";
+        INPUT_VIDEO = "";
+        email_interval_sec = 15;
+        SendEmail = false;
     }
 };
+
+pthread_t tid[2];
+static char strbuf[1024];
+
+void* playSound(void *arg)
+{
+    int result;
+    string res = execCommand(strbuf, result, false);
+    printf(strbuf);
+    return NULL;
+}
 
 class AudioFilePlayer
 {
@@ -44,14 +66,23 @@ public:
 
     AudioFilePlayer()
     {
-        CMD_PLAY_AUDIO = "cvlc";
-        SIREN_FILE = "~/WatchCat/SIREN1.wav";
+        CMD_PLAY_AUDIO = "ffplay -nodisp -autoexit";
+        SIREN_FILE = "/home/vova/WatchCat/SIREN1.wav";
         time(&t_since_play_start);
     }
 
     void another_method()
     {
         get_duration();
+        FILE* f =  fopen(SIREN_FILE.c_str(),"r");
+        if(f == NULL)
+        {
+            cout << "\n";
+            cout << "cannot open file " << SIREN_FILE << endl;
+        }
+        else
+          fclose(f);
+
         //t_since_play_start+=duration_sec;
     }
 
@@ -123,18 +154,18 @@ public:
         time_t current_time;
         time(&current_time);
         time_t delta = current_time - t_since_play_start;
-        printf("delta = %ld duration_sec = %ld\n ", delta, duration_sec);
+        //printf("delta = %ld duration_sec = %ld\n ", delta, duration_sec);
         //check if previos play is over
         if( delta >= duration_sec)
         {
             string cmd = create_cmd();
+            strcpy((char*)strbuf, (char*)cmd.c_str());
+            int err = pthread_create(&(tid[0]), NULL, &playSound, (void*)strbuf);
 
-
-            int PID;
-            if ((PID=fork())==0){
-                int result;
-                string res = execCommand(cmd, result);
-            }
+            if (err != 0)
+                printf("\ncan't create thread :[%d]", err);
+            else
+                printf("\n Thread created successfully\n");
             time(&t_since_play_start);
         }
 
