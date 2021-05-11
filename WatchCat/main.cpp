@@ -152,6 +152,11 @@ int main(int argc, char** argv)
     opts.INPUT_VIDEO = get_opt(parser,"input",opts.INPUT_VIDEO);
     opts.EMAIL = get_opt(parser,"email", opts.EMAIL);
     opts.EMAIL_SCRIPT = get_opt(parser, "p", opts.EMAIL_SCRIPT);
+    opts.SendEmail = true;
+
+    cout << "===========================================";
+    cout << "PREPARE TO LEAVE THE ROOM AFTER " << opts.LAUNCHING_TIME_DELAY_SEC << " seconds";
+    cout << "===========================================";
 
     cout << "EMAIL " << parser.get<string>("email") << "\n";
     cout << "EMAIL_SCRIPT " << opts.EMAIL_SCRIPT << "\n";
@@ -184,7 +189,7 @@ int main(int argc, char** argv)
     int frame_width = 640;
     int frame_height = 480;
 
-    printf(cv::getBuildInformation().c_str());
+    //printf(cv::getBuildInformation().c_str());
     cout << "Frames per second using video.get(CAP_PROP_FPS) : " << fps << endl;
     cout << "frame_width : " << frame_width << endl;
 
@@ -203,6 +208,7 @@ int main(int argc, char** argv)
 
 
     Mat frame, gray, gray1, gray2, gray3, prevFrame, frameDelta, thr, frame_overlay;
+
 
     for(;;)
     {
@@ -256,16 +262,15 @@ int main(int argc, char** argv)
             bMotionDetected = false;
 
         timer.stop();
-        //cout << "timer.getAvgTimeSec()" << timer.getAvgTimeSec() << "\n";
         sec_since_last_siren+=timer.getTimeSec();
         time_since_exec+=timer.getTimeSec();
         timer.reset();
         timer.start();
-
+        //cout << "time_since_exec " << time_since_exec << "\n";
 
         // alarm
         if(time_since_exec > opts.LAUNCHING_TIME_DELAY_SEC)
-        if(bMotionDetected && opts.SendEmail)
+        if(bMotionDetected)
         {
             int ret;
             cout << "sec_since_last_siren " << sec_since_last_siren << "\n";
@@ -273,11 +278,14 @@ int main(int argc, char** argv)
             if(sec_since_last_siren > opts.email_interval_sec)
             {
                 if(opts.PlaySound) sound_player.Play();
-                cout << "MOTION DETECTED SENDING EMAIL  " <<
-                        "sec_since_last_siren " << timer.getAvgTimeSec() << "\n ";
-                imwrite("/home/vova/frame.jpg", frame);
-                execCommand("python3 " + opts.EMAIL_SCRIPT, ret );
-                printf("-----------------EMAIL SENDED---------------------!\n");
+                //imwrite("/home/vova/frame.jpg", frame);
+                if(opts.SendEmail)
+                {
+                    cout << "MOTION DETECTED SENDING EMAIL  " <<
+                            "sec_since_last_siren " << timer.getAvgTimeSec() << "\n ";
+                    execCommand("python3 " + opts.EMAIL_SCRIPT, ret );
+                    printf("-----------------EMAIL SENDED---------------------!\n");
+                }
                 sec_since_last_siren = 0;
 
             }
