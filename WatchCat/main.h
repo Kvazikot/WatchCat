@@ -40,7 +40,7 @@ struct WatchCatOptions
         ShowRectangles = false;
         SIREN_FILE = "~/WatchCat/asdl1_tone2.wav";
         EMAIL_SCRIPT = "~/src/send_mail/send_mail.py";
-        INPUT_VIDEO = "";
+        INPUT_VIDEO = "0";
         email_interval_sec = 15;
         LAUNCHING_TIME_DELAY_SEC = 120; // 2 minutes
         SendEmail = false;

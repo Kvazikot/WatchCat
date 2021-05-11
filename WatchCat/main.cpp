@@ -63,6 +63,7 @@ static const string keys = "{ help h   |   | print help message }"
                            "{ sound_file  f | 0 | sound file }"
                            "{ show_date d  |   | print date }"
                            "{ input i  | 0 | take input video or stream }"
+                           "{ email_script p | 0 | path to email script }"
                            "{ email e  | 0 | email me }"
                            "{ output o  |  | save output video }";
 
@@ -87,6 +88,14 @@ void AudioPlayerTest()
     sleep(10);
     player.Play();
 
+}
+
+string get_opt(CommandLineParser& parser, string opt, string opt_default)
+{
+    if( parser.get<string>(opt).size() == 1)
+        return opt_default;
+    else
+        return parser.get<string>(opt);
 }
 
 int main(int argc, char** argv)
@@ -135,25 +144,20 @@ int main(int argc, char** argv)
     else {
         opts.WriteOutputVideo = true;
     }
-    cout << "opts.OUTPUT_VIDEO "  << opts.OUTPUT_VIDEO << endl;
+
     opts.RedirectVideoToStdout = parser.get<bool>("stdout");
-    if (parser.get<bool>("sound_file"))
-        opts.SIREN_FILE = parser.get<string>("sound_file");
+    opts.SIREN_FILE = get_opt(parser, "f", opts.SIREN_FILE);
     opts.ShowDate =  parser.get<bool>("show_date");
     opts.PlaySound = !parser.get<bool>("no_sound");
-    opts.INPUT_VIDEO = parser.get<string>("input");
-    cout << "opts.OUTPUT_VIDEO is " << opts.OUTPUT_VIDEO << endl;
+    opts.INPUT_VIDEO = get_opt(parser,"input",opts.INPUT_VIDEO);
+    opts.EMAIL = get_opt(parser,"email", opts.EMAIL);
+    opts.EMAIL_SCRIPT = get_opt(parser, "p", opts.EMAIL_SCRIPT);
 
-    if (parser.get<string>("email")=="true")
-    {
-        cout << "EMAIL " << parser.get<string>("email") << "\n";
-        opts.SendEmail = true;
-        opts.EMAIL = parser.get<string>("email");
-        printf("parser.has(email)");
-    }
-    else
-        opts.SendEmail = false;
-
+    cout << "EMAIL " << parser.get<string>("email") << "\n";
+    cout << "EMAIL_SCRIPT " << opts.EMAIL_SCRIPT << "\n";
+    cout << "SIREN_FILE "  << opts.SIREN_FILE << endl;
+    cout << "OUTPUT_VIDEO "  << opts.OUTPUT_VIDEO << endl;
+    cout << "INPUT_VIDEO " << opts.INPUT_VIDEO << "\n";
 
     bool bMotionDetected;
     VideoCapture cap;
@@ -164,7 +168,6 @@ int main(int argc, char** argv)
 
     sound_player.another_method();
 
-    std::cout << opts.INPUT_VIDEO << "\n";
 
     int dev_id = StrToInt(opts.INPUT_VIDEO);
     if( dev_id != INT_MAX)
