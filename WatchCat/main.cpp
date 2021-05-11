@@ -14,6 +14,7 @@
 using namespace cv;
 using namespace std;
 
+
 std::string execCommand(const std::string cmd, int& out_exitStatus, bool readPipe)
 {
     out_exitStatus = 0;
