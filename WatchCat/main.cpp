@@ -95,6 +95,7 @@ int main(int argc, char** argv)
     time_t now;
     TickMeter timer;
     double sec_since_last_siren=0;
+    double time_since_exec=0;
 
     now = time(NULL);
     struct tm *tm_struct = localtime(&now);
@@ -171,21 +172,25 @@ int main(int argc, char** argv)
     else
         if(!cap.open(opts.INPUT_VIDEO))
             return 0;
+
+    //TODO: parse this output "ffmpeg -f v4l2 -list_formats all -i /dev/video0"
     cap.set(CAP_PROP_FRAME_WIDTH, 640);
     cap.set(CAP_PROP_FRAME_HEIGHT, 480);
 
-    double fps = cap.get(CAP_PROP_FPS);
-    int frame_width = (int)cap.get(CAP_PROP_FRAME_WIDTH);
-    int frame_height = (int)cap.get(CAP_PROP_FRAME_HEIGHT);
+    double fps = 25;
+    int frame_width = 640;
+    int frame_height = 480;
+
     printf(cv::getBuildInformation().c_str());
     cout << "Frames per second using video.get(CAP_PROP_FPS) : " << fps << endl;
+    cout << "frame_width : " << frame_width << endl;
 
     // Open up the video for writing
     string filename = opts.OUTPUT_VIDEO; // Declare name of file here
 
     // Declare FourCC code - OpenCV 3.x and beyond
-    //int fourcc = VideoWriter::fourcc('H','2','6','4');
-    int fourcc = VideoWriter::fourcc('F', 'M', 'P', '4');
+    int fourcc = VideoWriter::fourcc('H','2','6','4');
+    //int fourcc = VideoWriter::fourcc('F', 'M', 'P', '4');
 
     if( opts.WriteOutputVideo)
     {
@@ -250,9 +255,13 @@ int main(int argc, char** argv)
         timer.stop();
         //cout << "timer.getAvgTimeSec()" << timer.getAvgTimeSec() << "\n";
         sec_since_last_siren+=timer.getTimeSec();
+        time_since_exec+=timer.getTimeSec();
         timer.reset();
         timer.start();
 
+
+        // alarm
+        if(time_since_exec > opts.LAUNCHING_TIME_DELAY_SEC)
         if(bMotionDetected && opts.SendEmail)
         {
             int ret;
@@ -320,7 +329,7 @@ int main(int argc, char** argv)
 
         if(frame.rows!=0 && opts.ShowVideo) imshow("this is you, smile! :)", frame);
 
-        if(opts.OUTPUT_VIDEO!="" && bMotionDetected) outputVideo.write(prevFrame);
+        if( opts.OUTPUT_VIDEO!="" && bMotionDetected ) outputVideo.write(prevFrame);
 
         if( frame.empty() ) break; // end of video stream
 

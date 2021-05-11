@@ -29,6 +29,7 @@ struct WatchCatOptions
     string  OUTPUT_VIDEO;
     string  INPUT_VIDEO;
     string  EMAIL;
+    int     LAUNCHING_TIME_DELAY_SEC;
 
     WatchCatOptions()
     {
@@ -41,6 +42,7 @@ struct WatchCatOptions
         EMAIL_SCRIPT = "~/src/send_mail/send_mail.py";
         INPUT_VIDEO = "";
         email_interval_sec = 15;
+        LAUNCHING_TIME_DELAY_SEC = 120; // 2 minutes
         SendEmail = false;
     }
 };

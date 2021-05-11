@@ -30,3 +30,5 @@
 *.exe
 *.out
 *.app
+
+/WarchCat/CMakeLists.txt.user
