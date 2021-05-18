@@ -7,8 +7,10 @@
 #include <opencv2/core/ocl.hpp>
 #include <unistd.h>
 #include <sys/stat.h>
+#include "soundrecorder.h"
 #include "face_detection.h"
 #include "str_utils.h"
+#include "oscillogram.h"
 #include "main.h"
 
 using namespace cv;
@@ -91,6 +93,14 @@ void AudioPlayerTest()
 
 }
 
+void SoundTest()
+{
+    //SoundRecorder sound_recorder;
+    SoundThresholding sound_thresholding;
+    //sound_thresholding.Test1();
+    sound_thresholding.StartProcessingThread();
+}
+
 string get_opt(CommandLineParser& parser, string opt, string opt_default)
 {
     if( parser.get<string>(opt).size() == 1)
@@ -106,7 +116,18 @@ int main(int argc, char** argv)
     TickMeter timer;
     double sec_since_last_siren=0;
     double time_since_exec=0;
+    SoundThresholding sound_thresholding;
 
+    //sound_thresholding.Test1();
+
+    //-------------- EXECUTING TESTS --------------------------------
+    //AudioPlayerTest();
+    //SoundTest();
+
+    //return 0;
+
+
+    //------------------------------------------------------------------------
     now = time(NULL);
     struct tm *tm_struct = localtime(&now);
     printf ( "Current local time and date: %s", asctime (tm_struct) );
@@ -118,8 +139,6 @@ int main(int argc, char** argv)
 
     //setting default options
     opts.OUTPUT_VIDEO = "watchcat_output_" + date_s + "_" + time_s + ".avi";
-
-
 
     CommandLineParser parser(argc, argv, keys);
     parser.about("This program work as motion detector with alarm and email notification.");
@@ -207,9 +226,9 @@ int main(int argc, char** argv)
         outputVideo.open(filename, fourcc, fps, Size(frame_width, frame_height));
     }
 
-
+    sound_thresholding.StartProcessingThread();
     Mat frame, gray, gray1, gray2, gray3, prevFrame, frameDelta, thr, frame_overlay;
-
+    Oscillogram oscillogram;
 
     for(;;)
     {
@@ -255,6 +274,7 @@ int main(int argc, char** argv)
             }
 
 
+
         }
 
         if(cnt > 3)
@@ -282,8 +302,8 @@ int main(int argc, char** argv)
                 //imwrite("/home/vova/frame.jpg", frame);
                 if(opts.SendEmail)
                 {
-                    cout << "MOTION DETECTED SENDING EMAIL  " <<
-                            "sec_since_last_siren " << timer.getAvgTimeSec() << "\n ";
+                    //cout << "MOTION DETECTED SENDING EMAIL  " <<
+                    //        "sec_since_last_siren " << timer.getAvgTimeSec() << "\n ";
                     execCommand("python3 " + opts.EMAIL_SCRIPT, ret );
                     printf("-----------------EMAIL SENDED---------------------!\n");
                 }
@@ -315,6 +335,11 @@ int main(int argc, char** argv)
         else
             putText(frame, "No Motion", Point(10, 20), cv::FONT_HERSHEY_TRIPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
 
+        //set data for oscillogram
+        oscillogram.SetSamples(sound_thresholding.data.buffer, sound_thresholding.data.buffer_frames);
+
+        //draw oscilogram for input webcam mic
+        oscillogram.Render(frame);
 
         //resize camera frame
         //cv::resize(frame, frame, cv::Size(), 2, 2);
@@ -356,12 +381,12 @@ int main(int argc, char** argv)
         }
     }
 
+    sound_thresholding.data.bStopThread = true;
     cap.release();
     outputVideo.release();
     cv::destroyAllWindows();
     sleep(1);
     cout << "closed!";
-    //AudioPlayerTest();
     //return 0;
     return 0;
     //return FaceDetectionLoop();
