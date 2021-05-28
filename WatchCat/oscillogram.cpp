@@ -32,14 +32,14 @@ void Oscillogram::SetSamples(short* buffer, int buffer_size)
 }
 
 // вычисляет где должно находиться окно осцилограмы в изображении img
-void Oscillogram::computeWindowRect(cv::Mat& img, WINDOW_CORNER corner=RIGHT_BOTTOM, float percent_of_side=0.5f)
+void Oscillogram::computeWindowRect(cv::Mat& img, WINDOW_CORNER corner=RIGHT_BOTTOM, float sx=0.3f, float sy=0.1f)
 {
     int WINDOW_BORDER = 10;
     switch(corner)
     {
         case RIGHT_BOTTOM:
-            window_rect.width = (int)((float)img.cols * percent_of_side);
-            window_rect.height = (int)((float)img.rows * percent_of_side);
+            window_rect.width = (int)((float)img.cols * sx);
+            window_rect.height = (int)((float)img.rows * sy);
             window_rect.x = img.cols  - window_rect.width - WINDOW_BORDER;
             window_rect.y = img.rows  - window_rect.height - WINDOW_BORDER;
         break;
@@ -103,5 +103,15 @@ void Oscillogram::Render(cv::Mat& img, float max_level)
         p0 = p;
         n++;
     }
+
+    cv::String str = cv::format("vol %2.2f dB", max_level);
+
+    cv::putText(img, //target image
+                str, //text
+                cv::Point(window_rect.x, window_rect.y), //top-left position
+                cv::FONT_HERSHEY_DUPLEX,
+                1.0,
+                CV_RGB(118, 185, 0), //font color
+                2);
 
 }

@@ -26,7 +26,7 @@ class Oscillogram
 public:
     Oscillogram();
     void AllocMemoryForSignal(HWParams& params, int time);
-    void computeWindowRect(cv::Mat& img, WINDOW_CORNER corner, float percent_of_side);
+    void computeWindowRect(cv::Mat& img, WINDOW_CORNER corner, float sx, float sy);
     void Render(cv::Mat& img, float max_level);
     void SetSamples(short* buffer, int buffer_size);
 };
