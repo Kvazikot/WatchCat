@@ -54,17 +54,14 @@ int TestKFR()
 
 SoundRecorder::SoundRecorder()
 {
-//    device_str = "hw:0,0";
-//    TestKFR();
-//    open_device(device_str);
+    set_device(AUDIO_DEVICE);
 }
 
-int open_device(string device, HWParams* data)
+// data->device_str must contain correct device name
+int open_device(HWParams* data)
 {
   int i;
   int err;  
-
-  data->device_str = device;
 
   if ((err = snd_pcm_open (&(data->capture_handle), data->device_str.c_str(), SND_PCM_STREAM_CAPTURE, 0)) < 0) {
     fprintf (stderr, "cannot open audio device %s (%s)\n",
@@ -190,13 +187,8 @@ void SoundThresholding::Test2()
 void SoundThresholding::Test1()
 {
     printf("SoundThresholding::Test1()\n");
-    return;
-    //set_device("hw:0,0");
-    set_device("hw:3,0");
-    //TestKFR();
-    open_device(device_name());
+    set_device(AUDIO_DEVICE);
     SoundThresholding::processing();
-    close_device();
 }
 
 
@@ -239,10 +231,11 @@ void* SoundThresholding_processing(void *arg)
     int err;
     fprintf(stdout, "SoundThresholding::processing()\n");
     sleep(5);
-    HWParams* data = (HWParams*)arg;
+    HWParams* data = (HWParams*)(arg);
+    //HWParams* data = *data1;
 
-    open_device(data->device_str, data);
-    fprintf(stdout,"%s\n", data->device_str.c_str());
+    open_device(data);
+    fprintf(stdout,"SoundThresholding_processing %s\n", data->device_str.c_str());
 
     // fft size
     const size_t size = 128;
@@ -259,66 +252,79 @@ void* SoundThresholding_processing(void *arg)
     // allocate work buffer for fft (if needed)
     univector<u8> temp(dft.temp_size);
 
-    int processing_time_sec = 10;
+    int processing_time_sec = 5;
     int n_samples = processing_time_sec * data->rate;
     int n_buffers = n_samples / data->buffer_frames;
     int data_size = data->rate * processing_time_sec * sizeof(short); //in bytes
     short* samples_output= (short*) malloc(data_size);
     short* data_ptr = samples_output;
-    fprintf(stdout, "data->ize = %d n_buffers = %d n_samples = %d", data, n_buffers, n_samples);
+    fprintf(stdout, "data_size = %d n_buffers = %d n_samples = %d", data_size, n_buffers, n_samples);
 
 
-    while( !data->bStopThread )
-    //for (int i = 0; i < n_buffers; ++i)
     {
-       if ((err = snd_pcm_readi (data->capture_handle, (short*)data->buffer, data->buffer_frames)) != data->buffer_frames) {
-          fprintf (stderr, "read from audio interface failed (%s)\n",
-                   err, snd_strerror (err));
-       }
+        #ifdef TEST_MODE
+          for (int i = 0; i < n_buffers; ++i)
+        #else
+        while( !data->bStopThread )
+        #endif
+        {
+           if ((err = snd_pcm_readi (data->capture_handle, (short*)data->buffer, data->buffer_frames)) != data->buffer_frames) {
+              fprintf (stderr, "read from audio interface failed (%s)\n",
+                       err, snd_strerror (err));
+           }
 
-        int n_fft_blocks = data->buffer_frames / size;
-        for (int n = 0; n < n_fft_blocks; ++n) {
+            int n_fft_blocks = data->buffer_frames / size;
+            for (int n = 0; n < n_fft_blocks; ++n) {
 
-            //fill input complex samples
-            for(int j=0; j < size; j++)
-            {
-                complex<fbase> sample(data->buffer[n * size + j],0);
-                in[j] = sample;
-                //data->i* n_buffers + n * size + j] = (float) sample.real() / 32768;
-                //*data_ptr = data->buffer[n * size + j];//sample.real(); /// 32768;
-                //data_ptr++;
+                //fill input complex samples
+                for(int j=0; j < size; j++)
+                {
+                    complex<fbase> sample(data->buffer[n * size + j],0);
+                    in[j] = sample;
+                    //data->i* n_buffers + n * size + j] = (float) sample.real() / 32768;
+                    #ifdef TEST_MODE
+                        *data_ptr = data->buffer[n * size + j];//sample.real(); /// 32768;
+                        data_ptr++;
+                    #endif
+                }
+
+                // perform forward fft
+                dft.execute(out, in, temp);
+
+                // scale output
+                out = out / size;
+
+                // get magnitude and convert to decibels
+                univector<fbase, size> dB = amp_to_dB(cabs(out));
+                data->result.max_level = mean(dB);
+                //println("max  = ", maxof(dB));
+                //println("min  = ", minof(dB));
+                //println("mean = ", mean(dB));
+                //println("rms  = ", rms(dB));
             }
 
-            // perform forward fft
-            dft.execute(out, in, temp);
+          }
 
-            // scale output
-            out = out / size;
-
-            // get magnitude and convert to decibels
-            univector<fbase, size> dB = amp_to_dB(cabs(out));
-
-            //println("max  = ", maxof(dB));
-            //println("min  = ", minof(dB));
-            println("mean = ", mean(dB));
-            //println("rms  = ", rms(dB));
-        }
-
-      }
+    }
     close_device(data);
-    //wavwrite("/home/vova/WatchCat/temp_soundthreshlding.wav", samples_output, data_size, data->rate, 1);
+#ifdef TEST_MODE
+    wavwrite("/home/vova/WatchCat/temp_soundthreshlding.wav", samples_output, data_size, data->rate, 1);
+#endif
     return 0;
 }
 
 void SoundThresholding::StartProcessingThread()
 {
-    set_device("hw:3,0");
-    int err = pthread_create(&(tid[0]), NULL, &SoundThresholding_processing, &this->data);
+    void* (*fun)(void*)  = NULL;
+    HWParams* param = &this->data;
+    fun = &SoundThresholding_processing;
+    int err = pthread_create(&(tid[0]), NULL, fun, param);
     // wait for the completion of thread 2
     //pthread_join(tid[0], NULL);
 }
 
 void SoundThresholding::processing()
 {
-    SoundThresholding_processing(this);
+    HWParams* param = &this->data;
+    SoundThresholding_processing(param);
 }

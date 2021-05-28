@@ -4,7 +4,15 @@
 #include <string>
 #include <alsa/asoundlib.h>
 
+//undefine it if not testing
+//#define TEST_MODE
+#define AUDIO_DEVICE "hw:3,0"
 using namespace std;
+
+struct ThresholdResult
+{
+    float max_level=0;
+};
 
 struct HWParams
 {
@@ -16,14 +24,14 @@ struct HWParams
     int buffer_frames = 128;
     unsigned int rate = 44100;
     bool bStopThread = false;
+    bool bTest = false;
+    ThresholdResult result;
 };
 
 class SoundRecorder
 { 
 public:
     SoundRecorder();
-    int open_device(string device);
-    void close_device();
     void set_device(string device_s);
     snd_pcm_t* device(){ return data.capture_handle;}
     string device_name(){ return data.device_str;}
@@ -40,7 +48,6 @@ class SoundThresholding : public SoundRecorder
         void Test1();
         void Test2();
         void StartProcessingThread();
-
         pthread_t tid[2];
 
 };

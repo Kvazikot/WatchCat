@@ -97,8 +97,8 @@ void SoundTest()
 {
     //SoundRecorder sound_recorder;
     SoundThresholding sound_thresholding;
-    //sound_thresholding.Test1();
-    sound_thresholding.StartProcessingThread();
+    sound_thresholding.Test1();
+    //sound_thresholding.StartProcessingThread();
 }
 
 string get_opt(CommandLineParser& parser, string opt, string opt_default)
@@ -117,14 +117,11 @@ int main(int argc, char** argv)
     double sec_since_last_siren=0;
     double time_since_exec=0;
     SoundThresholding sound_thresholding;
-
-    //sound_thresholding.Test1();
-
     //-------------- EXECUTING TESTS --------------------------------
-    //AudioPlayerTest();
-    //SoundTest();
-
-    //return 0;
+    #ifdef TEST_MODE
+    SoundTest();
+    return 0;
+    #endif
 
 
     //------------------------------------------------------------------------
@@ -134,7 +131,7 @@ int main(int argc, char** argv)
 
     timer.start();
 
-    string time_s = IntToStr(tm_struct->tm_hour) + ":" + IntToStr(tm_struct->tm_min) + ":" + IntToStr(tm_struct->tm_sec);
+    string time_s = IntToStr(tm_struct->tm_hour) + "" + IntToStr(tm_struct->tm_min) + "" + IntToStr(tm_struct->tm_sec);
     string date_s = IntToStr(tm_struct->tm_mday) + "." + IntToStr(tm_struct->tm_mon) + "." + IntToStr(tm_struct->tm_year + 1900 - 2000);
 
     //setting default options
@@ -227,9 +224,20 @@ int main(int argc, char** argv)
     }
 
     sound_thresholding.StartProcessingThread();
-    Mat frame, gray, gray1, gray2, gray3, prevFrame, frameDelta, thr, frame_overlay;
-    Oscillogram oscillogram;
 
+    Mat frame, gray, gray1, gray2, gray3, prevFrame, frameDelta, thr, frame_overlay;
+
+    Oscillogram oscillogram;
+    oscillogram.AllocMemoryForSignal(sound_thresholding.data, 2);
+
+    #ifdef TEST_MODE
+    for(;;)
+    {
+        if( waitKey(10) == 27 ) return 0; // stop capturing by pressing ESC
+    }
+    return 0;
+    #else
+    #endif
     for(;;)
     {
         vector<vector<Point> > contours;
@@ -339,7 +347,7 @@ int main(int argc, char** argv)
         oscillogram.SetSamples(sound_thresholding.data.buffer, sound_thresholding.data.buffer_frames);
 
         //draw oscilogram for input webcam mic
-        oscillogram.Render(frame);
+        oscillogram.Render(frame, sound_thresholding.data.result.max_level);
 
         //resize camera frame
         //cv::resize(frame, frame, cv::Size(), 2, 2);
