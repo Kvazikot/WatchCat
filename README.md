@@ -1,6 +1,7 @@
 # WatchCat
 
 ## Проект watchcat
+OS: Linux
 
 Проект на с++ использует вебкамеру
 Для сборки нужен opencv и cmake.
