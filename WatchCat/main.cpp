@@ -57,7 +57,7 @@ std::string execCommand(const std::string cmd, int& out_exitStatus, bool readPip
 #else
 std::string execCommand(const std::string cmd, int& out_exitStatus, bool readPipe)
 {
-	ShellExecute(0, "open", cmd.c_str(), NULL, NULL, 1);
+	ShellExecute(0, "open", "send_mail.bat", NULL, NULL, SW_SHOWNORMAL);
 	return "";
 }
 #endif
@@ -127,6 +127,8 @@ int main(int argc, char** argv)
     TickMeter timer;
     double sec_since_last_siren=0;
     double time_since_exec=0;
+
+	int a;
 
     now = time(NULL);
     struct tm *tm_struct = localtime(&now);
