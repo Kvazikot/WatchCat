@@ -1,6 +1,9 @@
 # WatchCat
 
 ## Проект watchcat
+OS: Linux
+OS: Windows (experimental mode)
+[скачать Watchcat_Release_1.02_win64.zip](https://github.com/Kvazikot/WatchCat/tags)
 
 Проект на с++ использует вебкамеру
 Для сборки нужен opencv и cmake.
@@ -15,7 +18,7 @@ vsbaranov83@gmail.com Владимир Баранов
 
 Дата создания: 13.03.21 14:52
 
-## Основные фнкции 
+## Основные функции 
 1. запись видео при срабатывании триггера
    аудио триггер (порог громкости превышает заданное значение)
    видео триггер (в кадре есть движение)
@@ -65,4 +68,35 @@ https://github.com/kfrlib/kfr/blob/master/examples/dft.cpp
 7. Нахождение максимального контура по площади
 8. Срабатывание тревоги если таких контуров больше 3.
 
+# Программа watchcat
 
+Программа watchcat нужна, если вы хотите узнать кто входил в вашу комнату пока вас не было.
+Возможно вы хотите знать кто садился за кмпьютер.
+Все что необходимо для ее работы это компьютер с linux и веб камера.
+Если у вас современный ноутбук с камерой, то веб камера вам не нужна.
+При появлении значимого движения в кадре, программы включает сирену
+и начинает высылать предупреждения на email.
+Звуковой файл сирены можно определить опцией -f
+Можно записывать видео на диск или пробрасывать его на stdout.
+ 
+```
+Usage: WatchCat [params]  
+       -d, --show_date
+               print date
+       -e, --email (value:0)
+               email me
+       -f, --sound_file (value:0)
+               sound file
+       -h, --help (value:true)
+               print help message
+       -i, --input (value:0)
+               take input video or stream
+       --no_sound, --ns (value:0)
+               don't play sound
+       --no_video, --nv (value:0)
+               don't show video
+       -o, --output
+               save output video
+       -s, --stdout (value:0)
+               std output in jmpeg
+```
