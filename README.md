@@ -3,7 +3,7 @@
 ## Проект watchcat
 OS: Linux
 OS: Windows (experimental mode)
-[скачать Watchcat_Release_1.02_win64.zip](https://github.com/Kvazikot/WatchCat/tags)
+[скачать Watchcat_Release_1.05_win64.zip](https://github.com/Kvazikot/WatchCat/tags)
 
 Проект на с++ использует вебкамеру
 Для сборки нужен opencv и cmake.
