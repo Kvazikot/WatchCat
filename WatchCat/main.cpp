@@ -5,7 +5,15 @@
 #include <vector>
 #include <iostream>
 #include <opencv2/core/ocl.hpp>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <shlobj.h>
+//#include <shlwapi.h>
+#include <objbase.h>
+#pragma comment(lib, "winmm.lib")
+#endif
+
 #include <sys/stat.h>
 #include "face_detection.h"
 #include "str_utils.h"
@@ -14,38 +22,52 @@
 using namespace cv;
 using namespace std;
 
+#ifndef _WIN32
 std::string execCommand(const std::string cmd, int& out_exitStatus, bool readPipe)
 {
-    out_exitStatus = 0;
-    string bash_cmd = cmd;
+	out_exitStatus = 0;
+	string bash_cmd = cmd;
 
-    auto pPipe = ::popen(bash_cmd.c_str(), "r");
-    if(pPipe == nullptr)
-    {
-        throw std::runtime_error("Cannot open pipe");
-    }
+	auto pPipe = ::popen(bash_cmd.c_str(), "r");
+	if (pPipe == nullptr)
+	{
+		throw std::runtime_error("Cannot open pipe");
+	}
 
-    std::array<char, 256> buffer;
+	std::array<char, 256> buffer;
 
-    std::string result;
+	std::string result;
 
-    if( readPipe )
-    while(not std::feof(pPipe))
-    {
-        auto bytes = std::fread(buffer.data(), 1, buffer.size(), pPipe);
-        result.append(buffer.data(), bytes);
-    }
+	if (readPipe)
+		while (not std::feof(pPipe))
+		{
+			auto bytes = std::fread(buffer.data(), 1, buffer.size(), pPipe);
+			result.append(buffer.data(), bytes);
+		}
 
-    auto rc = ::pclose(pPipe);
+	auto rc = ::pclose(pPipe);
 
-    if(WIFEXITED(rc))
-    {
-        out_exitStatus = WEXITSTATUS(rc);
-    }
+	if (WIFEXITED(rc))
+	{
+		out_exitStatus = WEXITSTATUS(rc);
+	}
 
-    return result;
+	return result;
 }
+#else
+std::string execCommand(const std::string cmd, int& out_exitStatus, bool readPipe)
+{
+	ShellExecute(0, "open", cmd.c_str(), NULL, NULL, 1);
+	return "";
+}
+#endif
 
+
+
+
+void sleep(int interval)
+{
+}
 
 string get_date_time()
 {
@@ -112,8 +134,8 @@ int main(int argc, char** argv)
 
     timer.start();
 
-    string time_s = IntToStr(tm_struct->tm_hour) + ":" + IntToStr(tm_struct->tm_min) + ":" + IntToStr(tm_struct->tm_sec);
-    string date_s = IntToStr(tm_struct->tm_mday) + "." + IntToStr(tm_struct->tm_mon) + "." + IntToStr(tm_struct->tm_year + 1900 - 2000);
+    string time_s = IntToStr(tm_struct->tm_hour) + "_" + IntToStr(tm_struct->tm_min) + "_" + IntToStr(tm_struct->tm_sec);
+    string date_s = IntToStr(tm_struct->tm_mday) + "_" + IntToStr(tm_struct->tm_mon) + "_" + IntToStr(tm_struct->tm_year + 1900 - 2000);
 
     //setting default options
     opts.OUTPUT_VIDEO = "watchcat_output_" + date_s + "_" + time_s + ".avi";
@@ -154,9 +176,9 @@ int main(int argc, char** argv)
     opts.EMAIL_SCRIPT = get_opt(parser, "p", opts.EMAIL_SCRIPT);
     opts.SendEmail = true;
 
-    cout << "===========================================";
-    cout << "PREPARE TO LEAVE THE ROOM AFTER " << opts.LAUNCHING_TIME_DELAY_SEC << " seconds";
-    cout << "===========================================";
+	cout << "===========================================" << endl;
+    cout << "PREPARE TO LEAVE THE ROOM AFTER " << opts.LAUNCHING_TIME_DELAY_SEC << " seconds" << endl;
+    cout << "===========================================" << endl;
 
     cout << "EMAIL " << parser.get<string>("email") << "\n";
     cout << "EMAIL_SCRIPT " << opts.EMAIL_SCRIPT << "\n";
@@ -174,7 +196,7 @@ int main(int argc, char** argv)
     sound_player.another_method();
 
 
-    int dev_id = StrToInt(opts.INPUT_VIDEO);
+    int dev_id = StrToInt(opts.INPUT_VIDEO.c_str());
     if( dev_id != INT_MAX)
         cap.open(dev_id );
     else
@@ -203,7 +225,11 @@ int main(int argc, char** argv)
     if( opts.WriteOutputVideo)
     {
         printf("outputVideo ");
-        outputVideo.open(filename, fourcc, fps, Size(frame_width, frame_height));
+		if (!outputVideo.open(filename, fourcc, fps, Size(frame_width, frame_height)))
+		{
+			cout << "cannot create output file! " << filename;
+			return 1;
+		}
     }
 
 
