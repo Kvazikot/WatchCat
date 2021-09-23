@@ -166,7 +166,7 @@ public:
 		time_t delta = current_time - t_since_play_start;
 		printf("delta = %ld duration_sec = %ld\n ", delta, duration_sec);
 		//check if previos play is over
-		if (delta >= duration_sec)
+		//if (delta >= duration_sec)
 		{
 			#ifndef _WIN32
 			string cmd = create_cmd();
