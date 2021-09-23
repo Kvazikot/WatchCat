@@ -30,10 +30,12 @@ struct WatchCatOptions
 	bool WriteOutputVideo;
 	bool  SendEmail;
 	double   email_interval_sec;
+	double     fps;
 	string  SIREN_FILE;
 	string  EMAIL_SCRIPT;
 	string  OUTPUT_VIDEO;
-	string  INPUT_VIDEO;
+	string  RESOLUTION;
+	double  INPUT_VIDEO;
 	string  EMAIL;
 	double     LAUNCHING_TIME_DELAY_SEC;
 
@@ -46,9 +48,11 @@ struct WatchCatOptions
 		ShowRectangles = false;
 		SIREN_FILE = "SIREN1.wav";
 		EMAIL_SCRIPT = "send_mail.py";
-		INPUT_VIDEO = "0";
+		INPUT_VIDEO = 0;
 		email_interval_sec = 15;
 		LAUNCHING_TIME_DELAY_SEC = 2.0; // 2 minutes
+		RESOLUTION = "640_480";
+		fps = 25;
 		SendEmail = false;
 	}
 };

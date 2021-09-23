@@ -83,7 +83,10 @@ static const string keys = "{ help h   |   | print help message }"
                            "{ no_sound ns | 0 | don't play sound }"
                            "{ stdout   s | 0 | std output in jmpeg }"
                            "{ sound_file  f | 0 | sound file }"
+						   "{ resolution  r | 640x480 | resolution 640x480 }"
+						   "{ frame rate  fps | 25 | 25 frames per second }"
                            "{ show_date d  |   | print date }"
+						   "{ delay dt  | 120 | set delay before alarm }"
                            "{ input i  | 0 | take input video or stream }"
                            "{ email_script p | 0 | path to email script }"
                            "{ email e  | 0 | email me }"
@@ -173,7 +176,10 @@ int main(int argc, char** argv)
     opts.SIREN_FILE = get_opt(parser, "f", opts.SIREN_FILE);
     opts.ShowDate =  parser.get<bool>("show_date");
     opts.PlaySound = !parser.get<bool>("no_sound");
-    opts.INPUT_VIDEO = get_opt(parser,"input",opts.INPUT_VIDEO);
+    opts.INPUT_VIDEO = StrToDouble(get_opt(parser, "input", DoubleToStr(opts.INPUT_VIDEO)));
+	opts.fps = StrToDouble(get_opt(parser, "fps", DoubleToStr(opts.fps)));
+	opts.LAUNCHING_TIME_DELAY_SEC = StrToDouble(get_opt(parser, "dt", DoubleToStr(opts.LAUNCHING_TIME_DELAY_SEC)));
+	opts.RESOLUTION = get_opt(parser, "r", opts.RESOLUTION);
     opts.EMAIL = get_opt(parser,"email", opts.EMAIL);
     opts.EMAIL_SCRIPT = get_opt(parser, "p", opts.EMAIL_SCRIPT);
     opts.SendEmail = true;
@@ -187,6 +193,8 @@ int main(int argc, char** argv)
     cout << "SIREN_FILE "  << opts.SIREN_FILE << endl;
     cout << "OUTPUT_VIDEO "  << opts.OUTPUT_VIDEO << endl;
     cout << "INPUT_VIDEO " << opts.INPUT_VIDEO << "\n";
+	cout << "RESOLUTION " << opts.RESOLUTION << endl;
+	cout << "FPS " << opts.fps << endl;
 
     bool bMotionDetected;
     VideoCapture cap;
@@ -198,20 +206,22 @@ int main(int argc, char** argv)
     sound_player.another_method();
 
 
-    int dev_id = StrToInt(opts.INPUT_VIDEO.c_str());
+    int dev_id = floor(opts.INPUT_VIDEO);
     if( dev_id != INT_MAX)
         cap.open(dev_id );
     else
         if(!cap.open(opts.INPUT_VIDEO))
             return 0;
 
-    //TODO: parse this output "ffmpeg -f v4l2 -list_formats all -i /dev/video0"
-    cap.set(CAP_PROP_FRAME_WIDTH, 640);
-    cap.set(CAP_PROP_FRAME_HEIGHT, 480);
 
-    double fps = 25;
-    int frame_width = 640;
-    int frame_height = 480;
+    //TODO: parse this output "ffmpeg -f v4l2 -list_formats all -i /dev/video0"
+	vector<std::string> res = StrSplitE(opts.RESOLUTION, "_", false);
+    cap.set(CAP_PROP_FRAME_WIDTH, StrToDouble(res[0]));
+    cap.set(CAP_PROP_FRAME_HEIGHT, StrToDouble(res[1]));
+
+    double fps = opts.fps;
+    int frame_width = StrToInt(res[0]);
+    int frame_height = StrToInt(res[1]);
 
     //printf(cv::getBuildInformation().c_str());
     cout << "Frames per second using video.get(CAP_PROP_FPS) : " << fps << endl;
