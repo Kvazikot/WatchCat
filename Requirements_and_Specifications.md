@@ -74,6 +74,13 @@ vsbaranov83@gmail.com Владимир Баранов
 * s828. 
 <br> 
 
+##  Программа Watchcat. Performance Requirements. 
+* r4390. Операционная система: Windows 2000 / Windows XP.
+* r4391. Процессор (CPU): Intel Pentium III Mobile 750MHz / AMD-K6 3D.
+* r4392. Видеокарта: GeForce 7600 GT / Radeon HD 7310G.
+* r4393. Свободный объем оперативной памяти: 96 MB RAM.
+* r4394. Свободное дисковое пространство: 500 MB Free.
+
 ## Программа Watchcat. Human factor Requirements.
 
 * r829. Для распознавания сложных образов требуется машина с хорошей видеокартой.
