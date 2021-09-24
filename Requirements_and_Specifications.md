@@ -1,4 +1,4 @@
-# WatchCat
+# WatchCat. Requirements and Specifications document.
 
 ## Проект watchcat
 OS: Linux
