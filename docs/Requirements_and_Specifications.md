@@ -142,3 +142,15 @@ https://github.com/kfrlib/kfr/blob/master/examples/dft.cpp
 3. How to Think Like Leonardo da Vinci by Gelb, Michael J 
 4. Systems Engineering Fundamentals and Applications by Reinhard Haberfellner, Olivier de Weck, Ernst Fricke, Siegfried Vössner 
 
+InverseReninfuckyourself
+09:54         8 467 135 Engineering Systems Meeting Human Needs in a Complex Technological World by Olivier L. de Weck, Daniel Roos, Christopher L. Magee, Charles M. Vest (z-lib.org).pdf
+24.09.2021  11:13         7 868 802 How to Think Like Leonardo da Vinci by Gelb, Michael J (z-lib.org).pdf
+24.09.2021  00:19         8 938 552 NASA Systems Engineering Handbook by National Aeronautics and Space Administration (NASA) (z-lib.org).pdf
+24.09.2021  16:32        16 156 797 Object-Process Methodology A Holistic Systems Paradigm by Professor Dov Dori (auth.) (z-lib.org).pdf
+24.09.2021  16:59         4 643 037 OPCAT_Manual_3.0.pdf
+24.09.2021  17:11         2 539 977 SysML-v0.9-PDF-050110R1.pdf
+24.09.2021  09:52         8 746 201 Systems Engineering Fundamentals and Applications by Reinhard Haberfellner, Olivier de Weck, Ernst Fricke, Siegfried Vössner (z-lib.org).pdf
+24.09.2021  00:20         2 667 518 The Radar Game - Understanding Stealth and Aircraft Survivability by Rebecca Grant (z-lib.org).pdf
+               8 файлов     60 028 019 байт
+               2 папок   9 649 348 608 байт свободно
+               
