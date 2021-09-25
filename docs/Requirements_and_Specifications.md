@@ -144,10 +144,8 @@ https://github.com/kfrlib/kfr/blob/master/examples/dft.cpp
 5. SysML-v0.9-PDF-050110R1
 6. OPCAT_Manual_3.0
 7. Object-Process Methodology A Holistic Systems Paradigm by Professor Dov Dori (auth.)
-8. How to Think Like Leonardo da Vinci by Gelb, Michael 
-9. Engineering Systems Meeting Human Needs in a Complex Technological World by Olivier L. de Weck, Daniel Roos, Christopher L. Magee, Charles M. Vest
-10. Systems Engineering Fundamentals and Applications by Reinhard Haberfellner, Olivier de Weck, Ernst Fricke, Siegfried Vössner 
-11. NASA Systems Engineering Handbook by National Aeronautics and Space Administration (NASA) (z-lib.org).pdf
+8. Systems Engineering Fundamentals and Applications by Reinhard Haberfellner, Olivier de Weck, Ernst Fricke, Siegfried Vössner 
+9. NASA Systems Engineering Handbook by National Aeronautics and Space Administration (NASA) (z-lib.org).pdf
 
 
 
